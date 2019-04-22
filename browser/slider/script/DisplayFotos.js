@@ -1,6 +1,7 @@
 'use strict'
 
-const FOTOFILES = ["airmax-jump.png",
+const FOTOFILES = [
+"airmax-jump.png",
 "airmax-on-foot.png",
 "airmax-playground.png",
 "airmax-top-view.png",
