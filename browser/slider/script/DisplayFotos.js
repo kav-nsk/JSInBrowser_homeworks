@@ -8,13 +8,13 @@ const FOTOFILES = [
 "airmax.png"];
 
 var objFoto = document.getElementById('slider');
-var i = 0;  // счетчик фотографий в массиве FOTOFILES
+objFoto.src = 'i/airmax-jump.png';
+var i = 1;  // счетчик фотографий в массиве FOTOFILES
 
 setInterval((list) => {
-    if (i < list.length) {
-        objFoto.src = 'i/' + list[i];
-        i++;
-    } else {
+    objFoto.src = 'i/' + list[i];
+    i++;
+    if (i === list.length) {
         i = 0;
     }
 }, 5000, FOTOFILES);
