@@ -24,7 +24,7 @@ for (let key of keys) {
 function playSound (event) {
 	let path = 'Middle';
 	pianoColor.className = 'middle';
-	if (event.ctrlKey) {			// По заданию ALT кнопка
+	if (event.altKey) {		// Проверял на CTRL, ALT  в FF под Linux блокирует клик от мыши
 		path = 'Hight';
 		pianoColor.className = 'higher';
 	} else if (event.shiftKey) {
