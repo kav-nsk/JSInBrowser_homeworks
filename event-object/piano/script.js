@@ -15,14 +15,17 @@ let pathToSetTone = {
 // Получаем нужные элементы
 let pianoColor = document.getElementsByTagName('ul')[0]; // Цвет оформления в зависимости от тона
 let keys = document.getElementsByTagName('li');		  // Набор клавиш
-let playElem = document.getElementsByTagName('audio');// Набор элементов-плееров
 
+let n = 0;											// Для присвоения номера клавиши
 for (let key of keys) {
 	key.addEventListener('click', playSound);
+	key.number = n
+	n++;
    }
 
 function playSound (event) {
 	let path = 'Middle';
+	let playElem = this.getElementsByTagName('audio')[0];
 	pianoColor.className = 'middle';
 	if (event.altKey) {		// Проверял на CTRL, ALT  в FF под Linux блокирует клик от мыши
 		path = 'Hight';
@@ -31,10 +34,9 @@ function playSound (event) {
 		path = 'Low';
 		pianoColor.className = 'lower';
 	}
-	for (let i = 0; i != keys.length; i++) {
-		playElem[i].src = pathToSetTone[path] + nameFiles[i];
-		playElem[i].currentTime = 0;
-	}
-	this.getElementsByTagName('audio')[0].play();
+	event.preventDefault();
+	playElem.src = pathToSetTone[path] + nameFiles[this.number];
+	playElem.currentTime = 0;
+	playElem.play();
     return;
 }
