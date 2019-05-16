@@ -3,20 +3,24 @@
 let inputForm = document.querySelector('.contentform');
 let outputForm = document.querySelector('#output');
 let inputList = inputForm.querySelectorAll('.form-group input,textarea');
-//let outputList = outputForm.querySelectorAll('output');
 let buttonSend = inputForm.querySelector('.button-contact');
 let buttonEdit = outputForm.querySelector('.button-contact');
 
-console.log(inputList);
-//console.log(outputList.length);
 
 // Глобальные переменные, массивы, словари, присвоение обработчиков.
 for (let inputLine of inputList) {
     inputLine.addEventListener('change', checkInputList);
+    // доп. обработчик для поля индекса запрещающий ввод текста
+    if (inputLine.getAttribute('name') == 'zip') {
+        inputLine.addEventListener('input', () => {
+            if (isNaN(this.value)) {
+                this.value = '';
+            }
+        })
+    }
 }
 buttonSend.addEventListener('click', sendData);
 buttonEdit.addEventListener('click', editData);
-
 
 
 // Главный поток.
