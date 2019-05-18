@@ -12,7 +12,7 @@ for (let inputLine of inputList) {
     inputLine.addEventListener('change', checkInputList);
     // доп. обработчик для поля индекса запрещающий ввод текста
     if (inputLine.getAttribute('name') == 'zip') {
-        inputLine.addEventListener('input', () => {
+        inputLine.addEventListener('input', function () {
             if (isNaN(this.value)) {
                 this.value = '';
             }
