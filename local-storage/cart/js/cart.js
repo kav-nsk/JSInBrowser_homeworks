@@ -21,25 +21,26 @@ let xhrSendBasket = new XMLHttpRequest();
 
 // Присвоение обработчиков событий.
 xhrColor.addEventListener('load', () => {
-    let xhrColorJson = JSON.parse(xhrColor.responseText);
-    console.log(xhrColorJson);
-    displayColor(xhrColorJson);
+    let xhrColorJson = JSON.parse(xhrColor.responseText); // Преобразовать и отобразить
+    displayColor(xhrColorJson);                           // на странице варианты цвета.
 });
 xhrSize.addEventListener('load', () => {
-    let xhrSizeJson = JSON.parse(xhrSize.responseText);
-    console.log(xhrSizeJson);
-    displaySize(xhrSizeJson);
-});
+    let xhrSizeJson = JSON.parse(xhrSize.responseText); // Преобразовать и отобразить
+    displaySize(xhrSizeJson);                           // на странице доступные размеры.
+});    
 xhrBasket.addEventListener('load', () => {
     let xhrBasketJson = JSON.parse(xhrBasket.responseText);
-    console.log(xhrBasketJson);
-    displayCartAndProduct(xhrBasketJson);
+    displayCartAndProduct(xhrBasketJson); // После получения данных, обновить отображение корзины и товара.
 });
-addToCartButton.addEventListener('click', sendToCart);
-toColorSwatch.addEventListener('click', setColor);
-toSizeSwatch.addEventListener('click', setSize);
+xhrSendBasket.addEventListener('load', basketUpdate);// После отправки данных. обновить корзину с сервера.
+
+toColorSwatch.addEventListener('click', setColor);  // Выбор цвета.
+toSizeSwatch.addEventListener('click', setSize);    // Выбор размера.
+addToCartButton.addEventListener('click', sendToCart);  // Отправка данных в корзину на сервер.
+
 
 // Основной поток.
+    // Получение исходных данных.
 xhrColor.open('GET', colorUrl);
 xhrColor.send();
 xhrSize.open('GET', sizeUrl);
@@ -49,9 +50,9 @@ xhrBasket.send();
 
 
 function setColor(event) {
+    // Удаление и установка новой отметки выбора цвета.
     if (event.target.tagName == 'INPUT') {
-        console.log(event.target);
-        new Array.from(toColorSwatch.getElementsByTagName('input')).forEach(i => {
+        Array.from(toColorSwatch.getElementsByTagName('input')).forEach(i => {
             if (i.hasAttribute('checked')) {
                 i.removeAttribute('checked');
             }
@@ -62,17 +63,23 @@ function setColor(event) {
 }
 
 function setSize(event) {
-    console.log(event.target);
+    if (event.target.tagName == 'INPUT') {
+        // Удаление и установка новой отметки выбора размера.
+        Array.from(toSizeSwatch.getElementsByTagName('input')).forEach(i => {
+            if (i.hasAttribute('checked')) {
+                i.removeAttribute('checked');
+            }
+        });
+        event.target.setAttribute('checked', '');
+    }
 }
 
 function sendToCart(event) {
     event.preventDefault();
-    console.log(addToCartForm.dataset.productId);
-    addToCartForm.append('productId', addToCartForm.dataset.productId);
+    let data = new FormData(addToCartForm);
+    data.append('productId', addToCartForm.dataset.productId);
     xhrSendBasket.open('POST', sendBasketUrl);
-    xhrSendBasket.setRequestHeader('Content-Type', 'application/json');
-    xhrSendBasket.send(addToCartForm);
-    basketUpdate();
+    xhrSendBasket.send(data);
 }
 
 function basketUpdate() {
@@ -152,6 +159,6 @@ function displayCartAndProduct(json) {
         const htmlBasket = (`<a id="quick-cart-pay" quickbeam="cart-pay" class="cart-ico ${open}"><span>
         <strong class="quick-cart-text">Оформить заказ<br></strong>
         <span id="quick-cart-price">$${totalCost}</span></span></a>`);
-        toQuickCart.innerHTML += htmlQuickCart + htmlBasket;
+        toQuickCart.innerHTML = htmlQuickCart + htmlBasket;
     }   
 }
