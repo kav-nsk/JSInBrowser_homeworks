@@ -3,8 +3,8 @@
 const toColorSwatch = document.getElementById('colorSwatch');   // Для ввода разметки по цветам товара.
 const toSizeSwatch = document.getElementById('sizeSwatch');     // Для ввода разметки по размерам.
 const toQuickCart = document.getElementById('quick-cart');      // Для размещения корзины.
-const addToCartForm = document.getElementById('AddToCartForm');  // Форма отправки заказа.
-const addToCartButton = document.getElementById('AddToCart').parentElement;
+const addToCartForm = document.getElementById('AddToCartForm'); // Форма отправки заказа.
+const addToCartButton = document.getElementById('AddToCart').parentElement; // Кнопка добавления в корзину.
 
 
 // Глобальные объявления.
@@ -16,7 +16,7 @@ const removeBasketUrl = 'https://neto-api.herokuapp.com/cart/remove';
 let xhrColor = new XMLHttpRequest();
 let xhrSize = new XMLHttpRequest();
 let xhrBasket = new XMLHttpRequest();
-let xhrSendBasket = new XMLHttpRequest();
+let xhrSendCart = new XMLHttpRequest();
 
 
 // Присвоение обработчиков событий.
@@ -32,11 +32,11 @@ xhrBasket.addEventListener('load', () => {
     let xhrBasketJson = JSON.parse(xhrBasket.responseText);
     displayCartAndProduct(xhrBasketJson); // После получения данных, обновить отображение корзины и товара.
 });
-xhrSendBasket.addEventListener('load', basketUpdate);// После отправки данных. обновить корзину с сервера.
+xhrSendCart.addEventListener('load', basketUpdate);// После отправки данных, обновить корзину с сервера.
 
 toColorSwatch.addEventListener('click', setColor);  // Выбор цвета.
 toSizeSwatch.addEventListener('click', setSize);    // Выбор размера.
-addToCartButton.addEventListener('click', sendToCart);  // Отправка данных в корзину на сервер.
+addToCartButton.addEventListener('click', saveCart);  // Отправка данных формы на сервер и в локальное хранилище.
 
 
 // Основной поток.
@@ -50,7 +50,6 @@ xhrBasket.send();
 
 
 function setColor(event) {
-    // Удаление и установка новой отметки выбора цвета.
     if (event.target.tagName == 'INPUT') {
         Array.from(toColorSwatch.getElementsByTagName('input')).forEach(i => {
             if (i.hasAttribute('checked')) {
@@ -64,7 +63,6 @@ function setColor(event) {
 
 function setSize(event) {
     if (event.target.tagName == 'INPUT') {
-        // Удаление и установка новой отметки выбора размера.
         Array.from(toSizeSwatch.getElementsByTagName('input')).forEach(i => {
             if (i.hasAttribute('checked')) {
                 i.removeAttribute('checked');
@@ -74,15 +72,17 @@ function setSize(event) {
     }
 }
 
-function sendToCart(event) {
+function saveCart(event) {
     event.preventDefault();
+    localStorage.cart = JSON.stringify(addToCartForm);
     let data = new FormData(addToCartForm);
     data.append('productId', addToCartForm.dataset.productId);
-    xhrSendBasket.open('POST', sendBasketUrl);
-    xhrSendBasket.send(data);
+    xhrSendCart.open('POST', sendBasketUrl);
+    xhrSendCart.send(data);
 }
 
 function basketUpdate() {
+    console.log(localStorage.cart);
     xhrBasket.open('GET', basketUrl);
     xhrBasket.send();
 }
@@ -100,7 +100,7 @@ function displayColor(json) {
             available = 'soldout';
             disabled = 'disabled';
         }
-        //  Цвет товара и код цвета для: {color}. Доступность: {soldout/available} и {disabled}. Описание цвета: {colorDescript}.
+        //  Цвет товара и код цвета: {color}. Доступность: {soldout/available} и {disabled}. Описание цвета: {colorDescript}.
         const htmlColorSwatch = (`<div data-value="${color}" class="swatch-element color ${color} ${available}">
         <div class="tooltip">${colorDescript}</div>
         <input quickbeam="color" id="swatch-1-${color}" type="radio" name="color" value="${color}" ${disabled}>
