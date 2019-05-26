@@ -8,15 +8,18 @@ let buttonEdit = outputForm.querySelector('.button-contact');
 
 
 // Глобальные переменные, массивы, словари, присвоение обработчиков.
+let index;
 for (let inputLine of inputList) {
     inputLine.addEventListener('change', checkInputList);
     // доп. обработчик для поля индекса запрещающий ввод текста
     if (inputLine.getAttribute('name') == 'zip') {
         inputLine.addEventListener('input', function () {
             if (isNaN(this.value)) {
-                this.value = '';
+                this.value = index;
+            } else {
+                index = this.value;
             }
-        })
+        });
     }
 }
 buttonSend.addEventListener('click', sendData);
