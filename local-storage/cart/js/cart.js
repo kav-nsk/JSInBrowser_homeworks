@@ -3,8 +3,9 @@
 let toColorSwatch = document.getElementById('colorSwatch');  // Для ввода html разметки по цветам товара.
 let toSizeSwatch = document.getElementById('sizeSwatch');    // Для ввода html разметки по размерам.
 const toQuickCart = document.getElementById('quick-cart');      // Для размещения корзины.
-const addToCartForm = document.getElementById('AddToCartForm'); // Форма отправки заказа.
+let addToCartForm;      // Форма отправки заказа.
 const addToCartButton = document.getElementById('AddToCart').parentElement; // Кнопка добавления в корзину.
+let removeButton;     // Кнопка удаления товара из корзины.
 
 
 // Глобальные объявления.
@@ -17,23 +18,22 @@ let xhrColor = new XMLHttpRequest();
 let xhrSize = new XMLHttpRequest();
 let xhrBasket = new XMLHttpRequest();
 let xhrSendCart = new XMLHttpRequest();
+let xhrRemoveCart = new XMLHttpRequest();
 let saveParam;  // Параметры для хранения в localStorage.
 
 
 // Присвоение обработчиков событий.
-xhrColor.addEventListener('load', () => {
-    let xhrColorJson = JSON.parse(xhrColor.responseText); // Преобразовать и отобразить
-    displayColor(xhrColorJson);                           // на странице варианты цвета.
+xhrColor.addEventListener('load', () => {               // Преобразовать и отобразить
+    displayColor(JSON.parse(xhrColor.responseText));    // на странице варианты цвета.
 });
-xhrSize.addEventListener('load', () => {
-    let xhrSizeJson = JSON.parse(xhrSize.responseText); // Преобразовать и отобразить
-    displaySize(xhrSizeJson);                           // на странице доступные размеры.
+xhrSize.addEventListener('load', () => {                // Преобразовать и отобразить
+    displaySize(JSON.parse(xhrSize.responseText));      // на странице доступные размеры.
 });    
 xhrBasket.addEventListener('load', () => {
-    let xhrBasketJson = JSON.parse(xhrBasket.responseText);
-    displayCartAndProduct(xhrBasketJson); // После получения данных, обновить отображение корзины и товара.
+    displayCartAndProduct(JSON.parse(xhrBasket.responseText)); // После получения данных, обновить отображение корзины и товара.
 });
-xhrSendCart.addEventListener('load', basketUpdate); // После отправки данных, обновить корзину с сервера.
+xhrSendCart.addEventListener('load', basketUpdate);     // После отправки данных, обновить корзину с сервера.
+xhrRemoveCart.addEventListener('load', basketUpdate);   // --- // --- после удаления товара из корзины.
 
 toColorSwatch.addEventListener('click', setColor);  // Выбор цвета.
 toSizeSwatch.addEventListener('click', setSize);    // Выбор размера.
@@ -89,10 +89,18 @@ function setSize(event) {
 
 function saveCart(event) {
     event.preventDefault();
+    addToCartForm = document.getElementById('AddToCartForm')
     let data = new FormData(addToCartForm);
     data.append('productId', addToCartForm.dataset.productId);
     xhrSendCart.open('POST', sendBasketUrl);
     xhrSendCart.send(data);
+}
+
+function removeCart(event) {
+    let form = new FormData ();
+    form.append('productId', event.target.dataset.id);
+    xhrRemoveCart.open('POST', removeBasketUrl);
+    xhrRemoveCart.send(form);
 }
 
 function basketUpdate() {
@@ -113,7 +121,7 @@ function displayColor(json) {
             available = 'soldout';
             disabled = 'disabled';
         }
-        if (saveParam.color == `swatch-1-${color}`) {
+        if (saveParam != undefined && saveParam.color == `swatch-1-${color}`) {
             checked = 'checked';
         } else {
             checked = '';
@@ -125,6 +133,9 @@ function displayColor(json) {
         <label for="swatch-1-${color}" style="border-color: red;"><span style="background-color: ${code};"></span>
         <img class="crossed-out" src="https://neto-api.herokuapp.com/hj/3.3/cart/soldout.png?10994296540668815886"></label></div>`);
         toColorSwatch.innerHTML += htmlColorSwatch;
+    }
+    if (saveParam.color == undefined) {
+        toColorSwatch.getElementsByTagName('input')[1].setAttribute('checked', '');
     }
 }
 
@@ -140,7 +151,7 @@ function displaySize(json) {
             available = 'soldout';
             disabled = 'disabled';
         }
-        if (saveParam.size == `swatch-0-${size}`) {
+        if (saveParam != undefined && saveParam.size == `swatch-0-${size}`) {
             checked = 'checked';
         } else {
             checked = '';
@@ -152,11 +163,18 @@ function displaySize(json) {
         </label></div>`);
         toSizeSwatch.innerHTML += htmlSizeSwatch;
     }
+    if (saveParam.size == undefined) {
+        toSizeSwatch.getElementsByTagName('input')[1].setAttribute('checked', '');
+    }
 }
 
 function displayCartAndProduct(json) {
-    let productId, imgSrc, titleProduct, amountProduct, dataId;
-    let totalCost = 0;
+    if (json.length == 0) {
+        toQuickCart.innerHTML = '';
+        return;
+    }
+    let productId, imgSrc, titleProduct, amountProduct;
+    let totalCost;
     let open = 'open';
     if (json.length == 0) {
         open = '';
@@ -165,7 +183,7 @@ function displayCartAndProduct(json) {
         //data.color;
         productId = data.id;
         imgSrc = data.pic;
-        //data.price;
+        totalCost = data.price * data.quantity;
         amountProduct = data.quantity;
         //data.size;
         titleProduct = data.title;
@@ -181,5 +199,7 @@ function displayCartAndProduct(json) {
         <strong class="quick-cart-text">Оформить заказ<br></strong>
         <span id="quick-cart-price">$${totalCost}</span></span></a>`);
         toQuickCart.innerHTML = htmlQuickCart + htmlBasket;
-    }   
+    }
+    removeButton = document.querySelector('.remove');
+    removeButton.addEventListener('click', removeCart);   // Удаление товара с сервера.
 }
