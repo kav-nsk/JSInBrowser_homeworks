@@ -1,7 +1,7 @@
 'use strict';
 // Интерфейс html.
-const toColorSwatch = document.getElementById('colorSwatch');   // Для ввода разметки по цветам товара.
-const toSizeSwatch = document.getElementById('sizeSwatch');     // Для ввода разметки по размерам.
+let toColorSwatch = document.getElementById('colorSwatch');  // Для ввода html разметки по цветам товара.
+let toSizeSwatch = document.getElementById('sizeSwatch');    // Для ввода html разметки по размерам.
 const toQuickCart = document.getElementById('quick-cart');      // Для размещения корзины.
 const addToCartForm = document.getElementById('AddToCartForm'); // Форма отправки заказа.
 const addToCartButton = document.getElementById('AddToCart').parentElement; // Кнопка добавления в корзину.
@@ -17,6 +17,7 @@ let xhrColor = new XMLHttpRequest();
 let xhrSize = new XMLHttpRequest();
 let xhrBasket = new XMLHttpRequest();
 let xhrSendCart = new XMLHttpRequest();
+let saveParam;  // Параметры для хранения в localStorage.
 
 
 // Присвоение обработчиков событий.
@@ -32,14 +33,21 @@ xhrBasket.addEventListener('load', () => {
     let xhrBasketJson = JSON.parse(xhrBasket.responseText);
     displayCartAndProduct(xhrBasketJson); // После получения данных, обновить отображение корзины и товара.
 });
-xhrSendCart.addEventListener('load', basketUpdate);// После отправки данных, обновить корзину с сервера.
+xhrSendCart.addEventListener('load', basketUpdate); // После отправки данных, обновить корзину с сервера.
 
 toColorSwatch.addEventListener('click', setColor);  // Выбор цвета.
 toSizeSwatch.addEventListener('click', setSize);    // Выбор размера.
-addToCartButton.addEventListener('click', saveCart);  // Отправка данных формы на сервер и в локальное хранилище.
+addToCartButton.addEventListener('click', saveCart);  // Отправка данных формы на сервер.
 
 
 // Основной поток.
+    // Если нет локально сохраненных данных о товаре, создаем объект в хранилище,
+    // иначе воссоздаем объект с текущими отметками цвета и размера из хранилища.
+if (localStorage.cart !== undefined) {
+    saveParam = JSON.parse(localStorage.cart);
+} else {
+    localStorage.cart = JSON.stringify({'color':'', 'size':''});
+}
     // Получение исходных данных.
 xhrColor.open('GET', colorUrl);
 xhrColor.send();
@@ -57,8 +65,11 @@ function setColor(event) {
             }
         });
         event.target.setAttribute('checked', '');
+        // Запись состояния цвета в объект localStorage.
+        let objSend = JSON.parse(localStorage.cart);
+        objSend.color = event.target.getAttribute('id');
+        localStorage.cart = JSON.stringify(objSend);
     }
-
 }
 
 function setSize(event) {
@@ -69,12 +80,15 @@ function setSize(event) {
             }
         });
         event.target.setAttribute('checked', '');
+        // Запись состояния размера в объект localStorage.
+        let obj = JSON.parse(localStorage.cart);
+        obj.size = event.target.getAttribute('id');
+        localStorage.cart = JSON.stringify(obj);
     }
 }
 
 function saveCart(event) {
     event.preventDefault();
-    localStorage.cart = JSON.stringify(addToCartForm);
     let data = new FormData(addToCartForm);
     data.append('productId', addToCartForm.dataset.productId);
     xhrSendCart.open('POST', sendBasketUrl);
@@ -82,37 +96,40 @@ function saveCart(event) {
 }
 
 function basketUpdate() {
-    console.log(localStorage.cart);
     xhrBasket.open('GET', basketUrl);
     xhrBasket.send();
 }
 
 function displayColor(json) {
-    let color, code, colorDescript, available, disabled;
+    let color, code, colorDescript, available, disabled, checked;
     for (let data of json) {
         color = data.type;
         code  = data.code;
         colorDescript = data.title;
         if (data.isAvailable) {
             available = 'available';
-            disabled = '';
+            disabled = 'NOdisabled';
         } else {
             available = 'soldout';
             disabled = 'disabled';
         }
+        if (saveParam.color == `swatch-1-${color}`) {
+            checked = 'checked';
+        } else {
+            checked = '';
+        }
         //  Цвет товара и код цвета: {color}. Доступность: {soldout/available} и {disabled}. Описание цвета: {colorDescript}.
         const htmlColorSwatch = (`<div data-value="${color}" class="swatch-element color ${color} ${available}">
         <div class="tooltip">${colorDescript}</div>
-        <input quickbeam="color" id="swatch-1-${color}" type="radio" name="color" value="${color}" ${disabled}>
+        <input quickbeam="color" id="swatch-1-${color}" type="radio" name="color" value="${color}" ${disabled} ${checked}>
         <label for="swatch-1-${color}" style="border-color: red;"><span style="background-color: ${code};"></span>
         <img class="crossed-out" src="https://neto-api.herokuapp.com/hj/3.3/cart/soldout.png?10994296540668815886"></label></div>`);
         toColorSwatch.innerHTML += htmlColorSwatch;
     }
-    toColorSwatch.lastElementChild.querySelector('input').setAttribute('checked', '');
 }
 
 function displaySize(json) {
-    let size, available, disabled, sizeDescript;
+    let size, available, disabled, sizeDescript, checked;
     for (let data of json) {
         size = data.type;
         sizeDescript = data.title;
@@ -123,14 +140,18 @@ function displaySize(json) {
             available = 'soldout';
             disabled = 'disabled';
         }
+        if (saveParam.size == `swatch-0-${size}`) {
+            checked = 'checked';
+        } else {
+            checked = '';
+        }
         //  Значение размера: {size}. Доступность: {soldout/available} и {disabled}. Описание цвета: {sizeDescript}.
         const htmlSizeSwatch = (`<div data-value="${size}" class="swatch-element plain ${size} ${available}">
-        <input id="swatch-0-${size}" type="radio" name="size" value="${size}" ${disabled}>
+        <input id="swatch-0-${size}" type="radio" name="size" value="${size}" ${disabled}  ${checked}>
         <label for="swatch-0-${size}">${sizeDescript}<img class="crossed-out" src="https://neto-api.herokuapp.com/hj/3.3/cart/soldout.png?10994296540668815886">
         </label></div>`);
         toSizeSwatch.innerHTML += htmlSizeSwatch;
     }
-    toSizeSwatch.lastElementChild.querySelector('input').setAttribute('checked', '');  
 }
 
 function displayCartAndProduct(json) {
