@@ -19,7 +19,7 @@ let xhrSize = new XMLHttpRequest();
 let xhrBasket = new XMLHttpRequest();
 let xhrSendCart = new XMLHttpRequest();
 let xhrRemoveCart = new XMLHttpRequest();
-let saveParam;  // Параметры для хранения в localStorage.
+let saveParam = {'color': undefined, 'size': undefined};  // Параметры для хранения в localStorage.
 
 
 // Присвоение обработчиков событий.
