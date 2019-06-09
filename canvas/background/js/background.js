@@ -22,7 +22,7 @@ const moveInTime = [function nextPoint(x, y, time) {
 // Заполнение массивов параметрами фигур.
 let crossList = [];
 let circleList = [];
-let num = Math.round(Math.random() * 75 + 25) * 2   // Случайое количество всех фигур.
+let num = Math.round(Math.random() * 75 + 25) * 2 // Случайное количество всех фигур 50...200.
 for (let i = 0; i < num / 2; i++) {
     let x = Math.round(Math.random() * canvasNode.width);
     let y = Math.round(Math.random() * canvasNode.height);
