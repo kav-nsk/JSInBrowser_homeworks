@@ -11,13 +11,6 @@ const seatTotNum = document.getElementById('totalPax');
 const seatAdultTotNum = document.getElementById('totalAdult');
 const seatHalfTotNum = document.getElementById('totalHalf');
 const typeJet = document.getElementById('seatMapTitle');
-    // Область изображения салона.
-//const seatMap = document.getElementById('seatMapDiv');
-let seatMap;
-
-// Глобально.
-let saloonMapJet;   // Принятый объект салона самолета.
-
 
 // Назначение обработчиков событий.
 btnSeatMap.parentElement.addEventListener('click', getSaloonMapJet);
@@ -33,29 +26,31 @@ displaySeatInform();
 function getSaloonMapJet(event) {
     event.preventDefault();
     let response = new XMLHttpRequest();
+    let saloonMapJet;   // Полученный объект салона.
+    let seatMap;        // Область изображения салона.
 
     response.addEventListener('load', function () {
         saloonMapJet = JSON.parse(response.responseText);
         btnSetFull.disabled = false;
         btnSetEmpty.disabled = false;
 
-        displayTypeJet();
+        displayTypeJet();   // Показать информацию по самолету.
 
-        seatMap = document.getElementById('seatMapDiv');
+        seatMap = document.getElementById('seatMapDiv');  
         seatMap.removeChild(seatMap.children[0]); // Удалить исходную надпись.
-        // Стираем предыдущую схему.
+        // Стираем предыдущую схему (если была).
         if (seatMap.children.length) {
             seatMap.querySelectorAll('.seating-row').forEach((i) => {
                 i.remove();
             });
             displaySeatInform();
         }
-
         displaySaloon();
     });
 
     response.open('GET', 'https://neto-api.herokuapp.com/plane/' + typeJetSelector.value);
     response.send();
+
 
     function displayTypeJet() {
         typeJet.innerText = saloonMapJet.title + ` (${saloonMapJet.passengers} пассажиров)`;
