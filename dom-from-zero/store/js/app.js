@@ -36,4 +36,6 @@ const content = e(
 );
 
 const wrapper = document.getElementById('root');
-wrapper.appendChild(createElement(content));
+let x = createElement(content);
+console.log(x);
+wrapper.appendChild(x);
