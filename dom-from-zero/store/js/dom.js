@@ -1,55 +1,40 @@
 'use strict';
 function createElement(content) {
-    let elem;
+    //createElement.elem - созданный элемент разметки.
+    //createElement.chaild - потомок созданного элемента разметки.
+
     // Создаем новый элемент, если пришел объект без tagName.
     if (typeof content === 'object' && !content.tagName) {
-        elem = document.createElement(content.name);
+        createElement.elem = document.createElement(content.name);
         if (content.props && typeof content.props === 'object') {
-            elem.classList.add(content.props.class);
+            // Заполняем классы.
+            content.props.class.split(' ').forEach(i => {
+                if (i !== '') {
+                    createElement.elem.classList.add(i);
+                } 
+            });
         }
-        console.log(elem);
-        content.childs.forEach(i => {
-            console.log(i);
-            createElement(i);
-        });
+        console.log(createElement.elem);
+        // Обращаемся к дочерним элементам.
+        if (content.childs.length !== 0) {
+            content.childs.forEach(i => {
+                createElement.chaild = createElement(i);
+            });
+        }
+
     }
-    // Если в дочерних элементах массив -> создаем и возвращаем текстовый узел.
+    // Если в аргументе текстовая строка -> создаем и возвращаем текстовый узел.
     if (typeof content === 'string') {
-        console.log(content);
         let result = document.createTextNode(content);
-        console.log(result);
         return result;
     }
     
-    console.log(elem, content);
-    let result = elem.appendChild(content);
-    console.log(result);
-    return result;
+    if (createElement.chaild) {
+        let result = createElement.elem.appendChild(createElement.chaild);
+        console.log(result);
+        return result;
+    } else {
+        return createElement.elem;
+    }
+
 }
-
-
-    /*
-    if (typeof content === 'string') {
-        console.log(content);
-        return document.createTextNode(content);
-    } else 
-    // Объект.
-    if (content.name && typeof content.name === 'string') {
-        elem = document.createElement(content.name);
-    }
-    
-    // Свойства.
-    if (content.props && typeof content.props === 'object') {
-        elem.classList.add(content.props.class);
-    }
-    // Дочерние элементы.
-    if (content.childs && typeof content.childs === 'array') {
-        content.childs.forEach(child => {
-            createElement(child);
-        });
-    }
-    //elem.appendChild(createElement(child));
-
-    console.log(elem);
-    return elem;
-    */
