@@ -1,8 +1,10 @@
 'use strict';
 
 function showComments(list) {
+  console.log(list);
   const commentsContainer = document.querySelector('.comments');
   const comments = list.map(createComment).join('');
+  console.log(comments);
   commentsContainer.innerHTML += comments;
 }
 
