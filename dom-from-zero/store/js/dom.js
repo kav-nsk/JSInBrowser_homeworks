@@ -4,7 +4,7 @@ function createElement(content) {
     //createElement.chaild - потомок созданного элемента разметки.
 
     // Создаем новый элемент, если пришел объект без tagName.
-    if (typeof content === 'object' && !content.tagName) {
+    if (typeof content === 'object' && !content.tagName && content.nodeName !== '#text') {
         createElement.elem = document.createElement(content.name);
 
         if (content.props && typeof content.props === 'object') {
@@ -16,23 +16,32 @@ function createElement(content) {
             });
         }
         //console.log(createElement.elem);
-        // Обращаемся к дочерним элементам.
-        if (content.childs.length !== 0) {
-            content.childs.forEach(i => {
-                createElement.chaild = createElement(i);
-                console.log(createElement.chaild);
-                //createElement.elem.appendChild(createElement.chaild);
-                //return result;
-            });
-        }
-
     } else if (typeof content === 'string') {
         let result = document.createTextNode(content);
+        //console.log(result.nodeName);
         //createElement.elem = result;
         return result;
     }
 
-    let result = createElement.elem.appendChild(createElement.chaild);
+    // Обращаемся к дочерним элементам.
+    if (content.childs.length !== 0) {
+        for (let i of content.childs) {
+
+            console.log(i);
+
+            createElement.chaild = createElement(i);
+
+            //console.log(createElement.chaild);
+
+            //createElement.elem.appendChild(createElement.chaild);
+
+            //console.log(createElement.elem);
+        }
+    } else {
+        createElement.elem.appendChild(createElement.chaild);
+    }
+
+    let result = createElement.elem;
     console.log(result);
     return result;
      /*
